@@ -12,8 +12,11 @@ class GraphqlController < AuthenticatedController
       # Query context goes here, for example:
       # current_user: current_user,
     }
-    result = SourceCodeProductSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
-    render json: result
+    # result = SourceCodeProductSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+    client = ShopifyAPI::Clients::Graphql::Admin.new(session: current_shopify_session)
+    incoming_query = GraphQL.parse(query).to_query_string
+    result = client.query(query: incoming_query, variables: variables).body["data"]
+    render json: { data: result }
   rescue StandardError => e
     raise e unless Rails.env.development?
     handle_error_in_development(e)

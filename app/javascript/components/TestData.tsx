@@ -1,9 +1,37 @@
 import { gql, useQuery } from '@apollo/client';
 import React from 'react';
-const TEST_QUERY = gql`query { testField }`;
-export default function TestData() {
-  const { loading, error, data } = useQuery(TEST_QUERY);
 
+interface Product {
+  node: {
+    id: number;
+    title: string;
+  }
+}
+interface ProductData {
+  products: {
+    edges: Product[]
+  }
+}
+
+const TEST_QUERY = gql`
+  {
+    products (first: 10) {
+      edges {
+        node {
+          id
+          title
+        }
+      }
+    }
+  }
+`;
+
+type TestDataFunction = {
+  // products: Array<{}>;
+}
+
+const TestData = () => {
+  const { loading, error, data } = useQuery<ProductData>(TEST_QUERY);
   if (loading) {
     return (
       <div>Loading </div>
@@ -14,7 +42,15 @@ export default function TestData() {
     );
   } else {
     return (
-      <p>{data.testField} </p>
+      <>
+        {data && data.products.edges.map(prod => {
+          return (
+            <p>{prod.node.title}</p>
+          )
+        })}
+      </>
     );
   }
-}
+};
+
+export default TestData;
